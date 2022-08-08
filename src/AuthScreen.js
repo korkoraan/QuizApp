@@ -1,4 +1,4 @@
-import React, {useState} from 'react';
+import React, {useEffect, useState} from 'react';
 import {
   KeyboardAvoidingView,
   Platform,
@@ -9,44 +9,78 @@ import {
   View,
 } from 'react-native';
 import firestore from '@react-native-firebase/firestore';
+import auth from '@react-native-firebase/auth';
 
 const userExists = async username => {
-  const user = await firestore().collection('users').doc(username).get();
-  return user;
-};
-
-const getUsers = async () => {
-  firestore()
+  const result = await firestore()
     .collection('users')
-    .doc('413gnOIQ3X3NImBjMHNR')
+    .where('name', '==', username)
     .get()
-    .then(data => console.log(data._data.name))
     .catch(err => console.error(err));
+  return result._docs.length > 0;
 };
 
-const validUser = user_info => {
-  if (!userExists(user_info.name)) {
-    return false;
+const userValid = async user_info => {
+  const exists = await userExists(user_info.name);
+  if (exists) {
+    return {valid: false, info: 'user already exists'};
   }
-  const usernameRegex = /^[a-zA-Z0-9]+$/;
-  return usernameRegex.test(user_info.name);
+  const regex = /^[a-zA-Z0-9]+$/;
+  const nameIsCorrect = regex.test(user_info.name);
+  const passwordIsCorrect = user_info.password.length > 8;
+  return {
+    userValid: nameIsCorrect && passwordIsCorrect && !exists,
+    userExists: exists,
+    nameIsCorrect: nameIsCorrect,
+    passwordIsCorrect: passwordIsCorrect,
+  };
 };
 
-const addUser = user_info => {
-  if (!validUser(user_info)) {
-    return false;
+const addUser1 = async (username, password) => {
+  const check = await userValid(username);
+  if (check.valid) {
+    firestore()
+      .collection('users')
+      .add({
+        name: username,
+        password: password,
+      })
+      .catch(err => console.error(err));
   }
-  firestore()
-    .collection('users')
-    .add({
-      name: user_info.name,
-    })
+};
+
+const addUser = async (username, password) => {
+  auth()
+    .createUserWithEmailAndPassword(username, password)
     .then(() => {
-      console.log('User added!');
+      console.log('User account created & signed in!');
+    })
+    .catch(error => {
+      if (error.code === 'auth/email-already-in-use') {
+        console.log('That email address is already in use!');
+      }
+
+      if (error.code === 'auth/invalid-email') {
+        console.log('That email address is invalid!');
+      }
+
+      console.error(error);
     });
 };
 
 export default function AuthScreen({navigation}) {
+  // Set an initializing state whilst Firebase connects
+  const [initializing, setInitializing] = useState(true);
+  const [user, setUser] = useState();
+
+  // Handle user state changes
+  function onAuthStateChanged(usr) {
+    setUser(usr);
+    if (initializing) {
+      setInitializing(false);
+    }
+  }
+
   const SubmitBtn = () => {
     return (
       <TouchableOpacity
@@ -62,7 +96,16 @@ export default function AuthScreen({navigation}) {
 
   const TestBtn = () => {
     return (
-      <TouchableOpacity style={styles.test_btn} onPress={getUsers}>
+      <TouchableOpacity
+        style={styles.test_btn}
+        onPress={async () => {
+          const creationLog = await addUser('stuart');
+          if (creationLog.errorMessage !== undefined) {
+            alert(creationLog.errorMessage);
+          }
+          // validUser('admin').then(check => console.log(check));
+          // userExists('admin').then( e => console.log(e));
+        }}>
         <Text style={styles.pseudo_icon}>?</Text>
       </TouchableOpacity>
     );
