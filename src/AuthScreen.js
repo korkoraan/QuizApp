@@ -8,43 +8,7 @@ import {
   TouchableOpacity,
   View,
 } from 'react-native';
-import firestore from '@react-native-firebase/firestore';
-
-const userExists = async username => {
-  const user = await firestore().collection('users').doc(username).get();
-  return user;
-};
-
-const getUsers = async () => {
-  firestore()
-    .collection('users')
-    .doc('413gnOIQ3X3NImBjMHNR')
-    .get()
-    .then(data => console.log(data._data.name))
-    .catch(err => console.error(err));
-};
-
-const validUser = user_info => {
-  if (!userExists(user_info.name)) {
-    return false;
-  }
-  const usernameRegex = /^[a-zA-Z0-9]+$/;
-  return usernameRegex.test(user_info.name);
-};
-
-const addUser = user_info => {
-  if (!validUser(user_info)) {
-    return false;
-  }
-  firestore()
-    .collection('users')
-    .add({
-      name: user_info.name,
-    })
-    .then(() => {
-      console.log('User added!');
-    });
-};
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 export default function AuthScreen({navigation}) {
   const SubmitBtn = () => {
@@ -52,7 +16,6 @@ export default function AuthScreen({navigation}) {
       <TouchableOpacity
         style={styles.submit_btn}
         onPress={() => {
-          // addUser(nickname);
           navigation.navigate('Home');
         }}>
         <Text style={styles.pseudo_icon}>-></Text>
@@ -62,7 +25,17 @@ export default function AuthScreen({navigation}) {
 
   const TestBtn = () => {
     return (
-      <TouchableOpacity style={styles.test_btn} onPress={getUsers}>
+      <TouchableOpacity
+        style={styles.test_btn}
+        onPress={async () => {
+          try {
+            // fake auth
+            await AsyncStorage.setItem('@user_id', 'WzEsFyZzSQJwl8TgxZxP');
+          } catch (e) {
+            throw e;
+          }
+          navigation.navigate('Home');
+        }}>
         <Text style={styles.pseudo_icon}>?</Text>
       </TouchableOpacity>
     );
