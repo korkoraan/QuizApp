@@ -8,6 +8,7 @@ import {
   TouchableOpacity,
   View,
 } from 'react-native';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 export default function AuthScreen({navigation}) {
   const SubmitBtn = () => {
@@ -18,6 +19,24 @@ export default function AuthScreen({navigation}) {
           navigation.navigate('Home');
         }}>
         <Text style={styles.pseudo_icon}>-></Text>
+      </TouchableOpacity>
+    );
+  };
+
+  const TestBtn = () => {
+    return (
+      <TouchableOpacity
+        style={styles.test_btn}
+        onPress={async () => {
+          try {
+            // fake auth
+            await AsyncStorage.setItem('@user_id', 'WzEsFyZzSQJwl8TgxZxP');
+          } catch (e) {
+            throw e;
+          }
+          navigation.navigate('Home');
+        }}>
+        <Text style={styles.pseudo_icon}>?</Text>
       </TouchableOpacity>
     );
   };
@@ -44,6 +63,7 @@ export default function AuthScreen({navigation}) {
           }}
         />
       </View>
+      <TestBtn />
       <View>{checkNickname()}</View>
     </KeyboardAvoidingView>
   );
@@ -81,6 +101,15 @@ const styles = StyleSheet.create({
   },
   submit_btn: {
     position: 'absolute',
+    marginTop: 40,
+    marginStart: 70,
+    borderRadius: 15,
+    width: 50,
+    height: 50,
+    borderColor: 'black',
+    borderWidth: 1,
+  },
+  test_btn: {
     marginTop: 40,
     marginStart: 70,
     borderRadius: 15,
