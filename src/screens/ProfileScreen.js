@@ -1,21 +1,17 @@
 import React, {useEffect, useState} from 'react';
 import {ActivityIndicator, StyleSheet, Text, View} from 'react-native';
-import LowerMenu from './components/LowerMenu';
-import firestore from '@react-native-firebase/firestore';
-import AsyncStorage from '@react-native-async-storage/async-storage';
-
-const getUserInfo = async () => {
-  const user_id = await AsyncStorage.getItem('@user_id');
-  const user = await firestore().collection('users').doc(user_id).get();
-  return user.data();
-};
+import LowerMenu from '../components/LowerMenu';
+import {getUserInfo} from '../functions';
 
 export default function ProfileScreen({navigation}) {
   const [user, setUser] = useState();
   const [loading, setLoading] = useState(true);
   useEffect(() => {
     getUserInfo()
-      .then(info => setUser(info))
+      .then(info => {
+        console.log(info);
+        setUser(info);
+      })
       .then(() => setLoading(false))
       .catch(e => console.log(e));
   }, []);

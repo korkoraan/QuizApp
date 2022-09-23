@@ -30,11 +30,16 @@ export default function AuthScreen({navigation}) {
         onPress={async () => {
           try {
             // fake auth
-            await AsyncStorage.setItem('@user_id', 'WzEsFyZzSQJwl8TgxZxP');
+            const userInfo = JSON.stringify({
+              name: 'El-Gemal',
+              level: 0,
+              wisdom_points: 0,
+            });
+            await AsyncStorage.setItem('@user', userInfo);
           } catch (e) {
             throw e;
           }
-          navigation.navigate('Home');
+          navigation.navigate('Quiz');
         }}>
         <Text style={styles.pseudo_icon}>?</Text>
       </TouchableOpacity>

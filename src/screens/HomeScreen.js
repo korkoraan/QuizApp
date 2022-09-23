@@ -8,7 +8,7 @@ import {
   TouchableOpacity,
   View,
 } from 'react-native';
-import LowerMenu from './components/LowerMenu';
+import LowerMenu from '../components/LowerMenu';
 
 export default function HomeScreen({navigation}) {
   const SubmitBtn = () => {
@@ -16,7 +16,7 @@ export default function HomeScreen({navigation}) {
       <TouchableOpacity
         style={styles.submit_btn}
         onPress={() => {
-          navigation.navigate('Profile');
+          navigation.navigate('Quiz');
         }}>
         <Text style={styles.pseudo_icon}>-></Text>
       </TouchableOpacity>
